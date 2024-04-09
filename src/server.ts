@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
@@ -47,6 +47,13 @@ app.use("/api", rootRouter);
 //     },
 //   },
 // });
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  res.locals.error = err;
+  if (err.status >= 100 && err.status < 600) res.status(err.status);
+  else res.status(500);
+  res.render("error");
+});
 
 export const prismaClient = new PrismaClient({
   log: ["query"],

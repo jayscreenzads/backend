@@ -30,6 +30,9 @@ export const signup = asyncHandler(
         middleName,
         lastName,
         suffixName,
+        dateOfBirth,
+        addressLine1,
+        addressLine2,
         role,
       } = req.body;
 
@@ -75,6 +78,9 @@ export const signup = asyncHandler(
           middleName,
           lastName,
           suffixName,
+          dateOfBirth,
+          addressLine1,
+          addressLine2,
           email,
           password: hashSync(password, 10),
           role,

@@ -13,6 +13,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// xdate     DateTime? @db.Date
+// xdatetime DateTime? @db.DateTime(0)
+
 enum Role {
   ADMIN
   AGENT_DRIVER
@@ -26,6 +29,10 @@ model User {
   middleName           String?
   lastName             String
   suffixName           String?
+  // dateOfBirth          DateTime  @db.Date
+  dateOfBirth          String
+  addressLine1         String
+  addressLine2         String
   email                String    @unique
   password             String
   role                 Role      @default(AGENT_DRIVER)
@@ -33,6 +40,55 @@ model User {
   updatedAt            DateTime  @updatedAt
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
+  driver               Driver?
 
   @@map("users")
+}
+
+model Driver {
+  id                Int        @id @default(autoincrement())
+  DL                String
+  SSN               String
+  preferredLocation String
+  dateRegistered    String
+  dateApproved      String?
+  userId            Int        @unique
+  user              User       @relation(fields: [userId], references: [id])
+  vehicle           Vehicle?
+  statistic         Statistic?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  @@map("drivers")
+}
+
+model Vehicle {
+  id           Int        @id @default(autoincrement())
+  vehicleMake  String
+  vehicleModel String
+  vehicleYear  String
+  driverId     Int        @unique
+  driver       Driver     @relation(fields: [driverId], references: [id])
+  statistic    Statistic?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("vehicles")
+}
+
+model Statistic {
+  id          Int      @id @default(autoincrement())
+  earnings    Decimal  @db.Decimal(9, 2)
+  milesDriven Decimal  @db.Decimal(9, 2)
+  dateStart   String
+  dateEnd     String?
+  driverId    Int      @unique
+  driver      Driver   @relation(fields: [driverId], references: [id])
+  vehicleId   Int      @unique
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // deleted     Boolean   @default(false)
+
+  @@map("statistics")
 }
