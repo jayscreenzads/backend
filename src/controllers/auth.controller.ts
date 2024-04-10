@@ -8,6 +8,7 @@ import { randomBytes } from "crypto";
 import { BadRequestsException } from "../exceptions/bad-requests";
 import { ErrorCode } from "../exceptions/roots";
 import { UnprocessableEntity } from "../exceptions/validation";
+import { SignUpSchema } from "../schema/user";
 
 const SECRET_KEY = process.env.JWT_SECRET!;
 
@@ -19,59 +20,67 @@ export function isValidRole(role: string): boolean {
   return roleArr.includes(role);
 }
 
-export const signup = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const {
-        email,
-        password,
-        confirmPassword,
-        firstName,
-        middleName,
-        lastName,
-        suffixName,
-        dateOfBirth,
-        addressLine1,
-        addressLine2,
-        role,
-      } = req.body;
+export const signup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    SignUpSchema.parse(req.body);
 
-      let user = await prismaClient.user.findFirst({ where: { email } });
+    const {
+      email,
+      password,
+      confirmPassword,
+      firstName,
+      middleName,
+      lastName,
+      suffixName,
+      dateOfBirth,
+      addressLine1,
+      addressLine2,
+      role,
+    } = req.body;
 
-      if (user) {
-        // res.status(500).send({ error: "User already exists!" });
-        next(
-          new BadRequestsException(
-            "User already exists!",
-            ErrorCode.USER_ALREADY_EXIST
-          )
-        );
-      }
+    let user = await prismaClient.user.findFirst({ where: { email } });
 
-      if (!isValidRole(role)) {
-        // res.status(500).json({ error: "Invalid role provided" });
-        // throw new Error("Invalid role provided");
-        next(
-          new BadRequestsException(
-            "Invalid role provided!",
-            ErrorCode.INVALID_ROLE_PROVIDED
-          )
-        );
-      }
+    console.log("signup user: ", user);
 
-      if (confirmPassword !== password) {
-        // res
-        //   .status(500)
-        //   .send({ error: "Password does not match with confirm password!" });
-        // throw new Error("Password does not match with confirm password!");
-        next(
-          new BadRequestsException(
-            "Password does not match with confirm password!",
-            ErrorCode.PASSWORD_NOT_MATCH
-          )
-        );
-      }
+    if (user) {
+      // res.status(500).send({ error: "User already exists!" });
+      next(
+        new BadRequestsException(
+          "User already exists!",
+          ErrorCode.USER_ALREADY_EXISTS
+        )
+      );
+    }
 
+    if (!isValidRole(role)) {
+      // res.status(500).json({ error: "Invalid role provided" });
+      // throw new Error("Invalid role provided");
+      next(
+        new BadRequestsException(
+          "Invalid role provided!",
+          ErrorCode.INVALID_ROLE_PROVIDED
+        )
+      );
+    }
+
+    // if (confirmPassword !== password) {
+    //   // res
+    //   //   .status(500)
+    //   //   .send({ error: "Password does not match with confirm password!" });
+    //   // throw new Error("Password does not match with confirm password!");
+    //   next(
+    //     new BadRequestsException(
+    //       "Password does not match with confirm password!",
+    //       ErrorCode.PASSWORD_NOT_MATCH
+    //     )
+    //   );
+    // }
+
+    if (role === "AGENT_DRIVER") {
       user = await prismaClient.user.create({
         data: {
           firstName,
@@ -86,19 +95,42 @@ export const signup = asyncHandler(
           role,
         },
       });
-
-      res.json(user);
-    } catch (error: any) {
-      next(
-        new UnprocessableEntity(
-          error?.cause?.issues,
-          "There is something wrong in your input field!",
-          ErrorCode.UNPROCESSABLE_ENTITY
-        )
-      );
+    } else {
+      user = await prismaClient.user.create({
+        data: {
+          firstName,
+          middleName,
+          lastName,
+          suffixName,
+          dateOfBirth,
+          addressLine1,
+          addressLine2,
+          email,
+          password: hashSync(password, 10),
+          role,
+        },
+      });
     }
+
+    res.json({
+      message: "Created a driver success",
+      result: "true",
+      data: { user },
+    });
+  } catch (error: any) {
+    // res
+    //   .status(500)
+    //   .send({ error: "There is something wrong in your input field!" });
+    // throw new Error("There is something wrong in your input field!");
+    next(
+      new UnprocessableEntity(
+        error?.issues,
+        "There is something wrong in your input field!",
+        ErrorCode.UNPROCESSABLE_ENTITY
+      )
+    );
   }
-);
+};
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;

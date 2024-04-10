@@ -12,7 +12,7 @@ const driverRoutes: Router = Router();
 
 driverRoutes.get("/get-drivers", auth, getDrivers);
 driverRoutes.get("/get-driver/:id", auth, getDriver);
-driverRoutes.post("/create-driver", auth, createDriver);
+driverRoutes.post("/create-driver", createDriver);
 driverRoutes.put("/update-driver/:id", auth, updateDriver);
 driverRoutes.delete("/delete-driver/:id", auth, deleteDriver);
 

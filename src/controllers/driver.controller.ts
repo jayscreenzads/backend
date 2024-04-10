@@ -30,16 +30,16 @@ export const getDriver = asyncHandler(async (req: Request, res: Response) => {
 
 export const createDriver = asyncHandler(
   async (req: Request, res: Response) => {
-    const { DL, SSN, preferredLocation, dateRegistered, dateApproved, userId } =
+    const { dl, ssn, preferredLoc, dateRegistered, dateApproved, userId } =
       req.body;
 
     console.log("createDriver");
 
     const driver = await prismaClient.driver.create({
       data: {
-        DL,
-        SSN,
-        preferredLocation,
+        dl,
+        ssn,
+        preferredLoc,
         dateRegistered,
         dateApproved,
         userId,
@@ -57,15 +57,14 @@ export const createDriver = asyncHandler(
 export const updateDriver = asyncHandler(
   async (req: Request, res: Response) => {
     const driverId = req.params.id;
-    const { DL, SSN, preferredLocation, dateRegistered, dateApproved } =
-      req.body;
+    const { dl, ssn, preferredLoc, dateRegistered, dateApproved } = req.body;
 
     const driver = await prismaClient.driver.update({
       where: { id: parseInt(driverId) },
       data: {
-        DL,
-        SSN,
-        preferredLocation,
+        dl,
+        ssn,
+        preferredLoc,
         dateRegistered,
         dateApproved,
       },

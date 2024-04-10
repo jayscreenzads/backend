@@ -7,8 +7,11 @@ export const SignUpSchema = z.object({
   middleName: z.string().nullable(),
   lastName: z.string(),
   suffixName: z.string().nullable(),
+  dateOfBirth: z.string(),
+  addressLine1: z.string(),
+  addressLine2: z.string().nullable(),
   email: z.string().email(),
-  password: z.string(),
-  confirmPassword: z.string(),
+  password: z.string().min(6),
+  confirmPassword: z.string().min(6),
   role: z.enum(ROLE),
 });

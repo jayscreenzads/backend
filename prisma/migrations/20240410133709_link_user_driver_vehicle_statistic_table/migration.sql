@@ -14,9 +14,9 @@ ADD COLUMN     "dateOfBirth" TEXT NOT NULL;
 -- CreateTable
 CREATE TABLE "drivers" (
     "id" SERIAL NOT NULL,
-    "DL" TEXT NOT NULL,
-    "SSN" TEXT NOT NULL,
-    "preferredLocation" TEXT NOT NULL,
+    "dl" TEXT NOT NULL,
+    "ssn" TEXT NOT NULL,
+    "preferredLoc" TEXT NOT NULL,
     "dateRegistered" TEXT NOT NULL,
     "dateApproved" TEXT,
     "userId" INTEGER NOT NULL,

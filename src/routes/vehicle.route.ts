@@ -12,7 +12,7 @@ const vehicleRoutes: Router = Router();
 
 vehicleRoutes.get("/get-vehicles", auth, getVehicles);
 vehicleRoutes.get("/get-vehicle/:id", auth, getVehicle);
-vehicleRoutes.post("/create-vehicle", auth, createVehicle);
+vehicleRoutes.post("/create-vehicle", createVehicle);
 vehicleRoutes.put("/update-vehicle/:id", auth, updateVehicle);
 vehicleRoutes.delete("/delete-vehicle/:id", auth, deleteVehicle);
 

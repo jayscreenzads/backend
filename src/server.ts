@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 var corsOptions = {
-  origin: "http://localhost:4200",
+  origin: ["http://localhost:4000", "http://localhost:5000"],
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
@@ -33,27 +33,6 @@ app.use(limiter);
 const PORT = process.env.PORT || 8000;
 
 app.use("/api", rootRouter);
-
-// // with zod fx
-// export const prismaClient = new PrismaClient({
-//   log: ["query"],
-// }).$extends({
-//   query: {
-//     user: {
-//       create({ args, query }) {
-//         args.data = SignUpSchema.parse(args.data);
-//         return query(args);
-//       },
-//     },
-//   },
-// });
-
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  res.locals.error = err;
-  if (err.status >= 100 && err.status < 600) res.status(err.status);
-  else res.status(500);
-  res.render("error");
-});
 
 export const prismaClient = new PrismaClient({
   log: ["query"],

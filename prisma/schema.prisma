@@ -46,18 +46,18 @@ model User {
 }
 
 model Driver {
-  id                Int        @id @default(autoincrement())
-  DL                String
-  SSN               String
-  preferredLocation String
-  dateRegistered    String
-  dateApproved      String?
-  userId            Int        @unique
-  user              User       @relation(fields: [userId], references: [id])
-  vehicle           Vehicle?
-  statistic         Statistic?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  id             Int        @id @default(autoincrement())
+  dl             String
+  ssn            String
+  preferredLoc   String
+  dateRegistered String
+  dateApproved   String?
+  userId         Int        @unique
+  user           User       @relation(fields: [userId], references: [id])
+  vehicle        Vehicle?
+  statistic      Statistic?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   @@map("drivers")
 }
