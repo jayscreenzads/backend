@@ -92,3 +92,46 @@ model Statistic {
 
   @@map("statistics")
 }
+
+model Customer {
+  id               Int      @id @default(autoincrement())
+  name             String
+  email            String   @unique
+  phone            String
+  stripeCustomerId String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  // deleted     Boolean   @default(false)
+
+  @@map("customers")
+}
+
+model Charges {
+  id             Int      @id @default(autoincrement())
+  email          String
+  amount         Decimal  @db.Decimal(9, 2)
+  card_id        String
+  description    String
+  customer_id    Int
+  stripeChargeId String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  // deleted     Boolean   @default(false)
+
+  @@map("charges")
+}
+
+model Product {
+  id              Int      @id @default(autoincrement())
+  name            String
+  description     String
+  active          Boolean
+  default_price   Decimal  @db.Decimal(9, 2)
+  stripeProductId String
+  stripePriceId   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  // deleted     Boolean   @default(false)
+
+  @@map("products")
+}

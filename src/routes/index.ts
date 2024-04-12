@@ -4,6 +4,7 @@ import userRoutes from "./user.route";
 import driverRoutes from "./driver.route";
 import vehicleRoutes from "./vehicle.route";
 import statisticRoutes from "./statistic.route";
+import paymentRoutes from "./payment.route";
 
 const rootRouter: Router = Router();
 
@@ -12,5 +13,6 @@ rootRouter.use("/user", userRoutes);
 rootRouter.use("/driver", driverRoutes);
 rootRouter.use("/vehicle", vehicleRoutes);
 rootRouter.use("/statistic", statisticRoutes);
+rootRouter.use("/registration-payment", paymentRoutes);
 
 export default rootRouter;
