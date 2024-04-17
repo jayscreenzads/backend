@@ -46,20 +46,32 @@ model User {
 }
 
 model Driver {
-  id             Int        @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   dl             String
   ssn            String
   preferredLoc   String
   dateRegistered String
   dateApproved   String?
-  userId         Int        @unique
-  user           User       @relation(fields: [userId], references: [id])
+  userId         Int           @unique
+  user           User          @relation(fields: [userId], references: [id])
   vehicle        Vehicle?
   statistic      Statistic?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  driverImages   DriverImage[]
 
   @@map("drivers")
+}
+
+model DriverImage {
+  id           Int      @id @default(autoincrement())
+  originalname String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  driverId     Int
+  driver       Driver   @relation(fields: [driverId], references: [id])
+
+  @@map("driver_images")
 }
 
 model Vehicle {
@@ -119,6 +131,19 @@ model Charges {
   // deleted     Boolean   @default(false)
 
   @@map("charges")
+}
+
+model Payment {
+  id             Int      @id @default(autoincrement())
+  customer_email String?
+  amount         Decimal  @db.Decimal(9, 2)
+  paymentId      String
+  paymentStatus  String
+  paymentDate    Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("payments")
 }
 
 model Product {

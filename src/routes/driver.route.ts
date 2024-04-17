@@ -1,4 +1,10 @@
 import { Router } from "express";
+const aws = require("aws-sdk");
+const express = require("express");
+const multer = require("multer");
+const multerS3 = require("multer-s3");
+import dotenv from "dotenv";
+dotenv.config();
 import {
   createDriver,
   deleteDriver,
@@ -7,6 +13,22 @@ import {
   updateDriver,
 } from "../controllers/driver.controller";
 import { auth } from "../middlewares/verifyToken";
+
+// Change bucket property to your Space name
+const storage = multer.memoryStorage();
+const fileFilter = (req: any, file: any, cb: any) => {
+  if (file.mimetype.split("/")[0] === "image") {
+    cb(null, true);
+  } else {
+    cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE"), false);
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 1000000000, files: 2 },
+});
 
 const driverRoutes: Router = Router();
 

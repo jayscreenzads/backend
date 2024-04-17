@@ -13,11 +13,12 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-var corsOptions = {
-  origin: ["http://localhost:4000", "http://localhost:5000"],
-  optionsSuccessStatus: 200, // For legacy browser support
+const whitelist = ["http://localhost:4000", "http://localhost:5000"];
 
-  allowedHeaders: ["Content-Type", "Access-Control-Allow-Origin", "Origin"],
+var corsOptions = {
+  origin: whitelist,
+  optionsSuccessStatus: 200, // For legacy browser support
+  // allowedHeaders: ["Content-Type", "Access-Control-Allow-Origin", "Origin"],
 };
 
 //cors

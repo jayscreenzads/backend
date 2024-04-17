@@ -4,6 +4,7 @@ import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
+import { buffer } from "micro";
 import Stripe from "stripe";
 const stripe = new Stripe(`${process.env.STRIPE_SECRET_KEY}`);
 
@@ -160,22 +161,24 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
   try {
     const { productName, productDescription, productPrice } = req.body;
 
-    const lineItem = {
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: productName,
-          description: productDescription,
+    const lineItem = [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: productName,
+            description: productDescription,
+          },
+          unit_amount: Math.round(productPrice * 100),
         },
-        unit_amount: Math.round(productPrice * 100),
+        quantity: 1,
       },
-      quantity: 1,
-    };
+    ];
 
     const session = await stripe.checkout.sessions.create(
       {
         payment_method_types: ["card"],
-        line_items: [lineItem],
+        line_items: lineItem,
         mode: "payment",
         success_url: `${process.env.AGENT_DRIVER_PORTAL_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.AGENT_DRIVER_PORTAL_URL}/payment`,
@@ -206,4 +209,54 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
     //   });
     // }
   } catch (error) {}
+};
+
+// This is your Stripe CLI webhook secret for testing your endpoint locally.
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET_KEY;
+
+export const getPaymentWebhook = async (req: Request, res: Response) => {
+  console.log("getPaymentWebhook");
+
+  const reqBuffer = await buffer(req);
+
+  const sig = req.headers["stripe-signature"];
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig as any,
+      endpointSecret as any
+    );
+
+    console.log("event.type: ", event.type);
+
+    // Handle the event
+    if (event.type === "checkout.session.completed") {
+      const paymentIntentSucceeded = await prismaClient.payment.create({
+        data: {
+          customer_email: event.data.object?.customer_email,
+          amount: event.data.object.amount_total
+            ? event.data.object.amount_total / 100
+            : 0,
+          paymentId: event.data.object.id,
+          paymentStatus: event.data.object.payment_status,
+          paymentDate: event.data.object.created,
+        },
+      });
+      console.log("paymentIntentSucceeded : ", paymentIntentSucceeded);
+      res
+        .status(200)
+        .send({
+          message: "Created a vehicle success",
+          result: "true",
+          data: { paymentIntentSucceeded },
+        })
+        .end();
+    }
+  } catch (err: any) {
+    console.log("error: ", err);
+    res.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
 };
