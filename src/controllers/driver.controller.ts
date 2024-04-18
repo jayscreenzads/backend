@@ -91,8 +91,11 @@ export const createDriver = async (req: Request, res: Response) => {
             }
           }).promise();
           console.log("success upload: ", data);
-        } catch (error) {
+        } catch (error: any) {
           //handle error
+          res
+            .status(error?.status || 400)
+            .send(error?.message || "Something went wrong!");
         }
       });
     }

@@ -261,9 +261,11 @@ export const forgotPassword = async (req: Request, res: Response) => {
       console.log("Email sent:", info.response);
       res.json({ message: "Email sent successfully" });
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error processing request:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res
+      .status(error?.status || 400)
+      .send(error?.message || "Something went wrong!");
   }
 };
 
@@ -309,8 +311,10 @@ export const resetPassword = async (req: Request, res: Response) => {
     });
 
     res.json({ message: "Password reset successfully" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error resetting password:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res
+      .status(error?.status || 400)
+      .send(error?.message || "Something went wrong!");
   }
 };
