@@ -20,11 +20,7 @@ export function isValidRole(role: string): boolean {
   return roleArr.includes(role);
 }
 
-export const signup = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const signup = async (req: Request, res: Response) => {
   try {
     SignUpSchema.parse(req.body);
 
@@ -47,38 +43,38 @@ export const signup = async (
     console.log("signup user: ", user);
 
     if (user) {
-      // res.status(500).send({ error: "User already exists!" });
-      next(
-        new BadRequestsException(
-          "User already exists!",
-          ErrorCode.USER_ALREADY_EXISTS
-        )
-      );
+      res.status(500).send({ error: "User already exists!" });
+      // next(
+      //   new BadRequestsException(
+      //     "User already exists!",
+      //     ErrorCode.USER_ALREADY_EXISTS
+      //   )
+      // );
     }
 
     if (!isValidRole(role)) {
-      // res.status(500).json({ error: "Invalid role provided" });
-      // throw new Error("Invalid role provided");
-      next(
-        new BadRequestsException(
-          "Invalid role provided!",
-          ErrorCode.INVALID_ROLE_PROVIDED
-        )
-      );
+      res.status(500).json({ error: "Invalid role provided" });
+      throw new Error("Invalid role provided");
+      // next(
+      //   new BadRequestsException(
+      //     "Invalid role provided!",
+      //     ErrorCode.INVALID_ROLE_PROVIDED
+      //   )
+      // );
     }
 
-    // if (confirmPassword !== password) {
-    //   // res
-    //   //   .status(500)
-    //   //   .send({ error: "Password does not match with confirm password!" });
-    //   // throw new Error("Password does not match with confirm password!");
-    //   next(
-    //     new BadRequestsException(
-    //       "Password does not match with confirm password!",
-    //       ErrorCode.PASSWORD_NOT_MATCH
-    //     )
-    //   );
-    // }
+    if (confirmPassword !== password) {
+      res
+        .status(500)
+        .send({ error: "Password does not match with confirm password!" });
+      throw new Error("Password does not match with confirm password!");
+      // next(
+      //   new BadRequestsException(
+      //     "Password does not match with confirm password!",
+      //     ErrorCode.PASSWORD_NOT_MATCH
+      //   )
+      // );
+    }
 
     if (role === "AGENT_DRIVER") {
       user = await prismaClient.user.create({
@@ -113,22 +109,23 @@ export const signup = async (
     }
 
     res.json({
-      message: "Created a driver success",
+      message:
+        "Created a driver account successfully. Please check your email for approval of your account",
       result: "true",
       data: { user },
     });
   } catch (error: any) {
-    // res
-    //   .status(500)
-    //   .send({ error: "There is something wrong in your input field!" });
-    // throw new Error("There is something wrong in your input field!");
-    next(
-      new UnprocessableEntity(
-        error?.issues,
-        "There is something wrong in your input field!",
-        ErrorCode.UNPROCESSABLE_ENTITY
-      )
-    );
+    res
+      .status(422)
+      .send({ error: "There is something wrong in your input field!" });
+    throw new Error("There is something wrong in your input field!");
+    // next(
+    //   new UnprocessableEntity(
+    //     error?.issues,
+    //     "There is something wrong in your input field!",
+    //     ErrorCode.UNPROCESSABLE_ENTITY
+    //   )
+    // );
   }
 };
 
@@ -259,7 +256,6 @@ export const forgotPassword = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Failed to send email" });
       }
       console.log("Email sent:", info.response);
-      res.json({ message: "Email sent successfully" });
     });
   } catch (error: any) {
     console.error("Error processing request:", error);
@@ -267,6 +263,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
       .status(error?.status || 400)
       .send(error?.message || "Something went wrong!");
   }
+
+  res.status(200).json({ message: "Email sent successfully" });
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
@@ -309,12 +307,12 @@ export const resetPassword = async (req: Request, res: Response) => {
         resetPasswordExpires: null,
       },
     });
-
-    res.json({ message: "Password reset successfully" });
   } catch (error: any) {
     console.error("Error resetting password:", error);
     res
       .status(error?.status || 400)
       .send(error?.message || "Something went wrong!");
   }
+
+  res.status(200).json({ message: "Password reset successfully" });
 };

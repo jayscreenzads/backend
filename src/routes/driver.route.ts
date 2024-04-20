@@ -8,6 +8,8 @@ dotenv.config();
 import {
   createDriver,
   deleteDriver,
+  deleteImage,
+  emailCreatedDriver,
   getDriver,
   getDrivers,
   updateDriver,
@@ -37,5 +39,7 @@ driverRoutes.get("/get-driver/:id", auth, getDriver);
 driverRoutes.post("/create-driver", createDriver);
 driverRoutes.put("/update-driver/:id", auth, updateDriver);
 driverRoutes.delete("/delete-driver/:id", auth, deleteDriver);
+driverRoutes.post("/email-created-driver", emailCreatedDriver);
+driverRoutes.delete("/delete-image/:userId", deleteImage);
 
 export default driverRoutes;

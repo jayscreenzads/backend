@@ -45,6 +45,13 @@ model User {
   @@map("users")
 }
 
+enum DriverStatus {
+  VERIFICATION_PENDING
+  APPROVED
+  DECLINED
+  CANCELLED
+}
+
 model Driver {
   id             Int           @id @default(autoincrement())
   dl             String
@@ -52,6 +59,8 @@ model Driver {
   preferredLoc   String
   dateRegistered String
   dateApproved   String?
+  dateDeclined   String?
+  dateCancelled  String?
   userId         Int           @unique
   user           User          @relation(fields: [userId], references: [id])
   vehicle        Vehicle?
@@ -59,6 +68,7 @@ model Driver {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   driverImages   DriverImage[]
+  status         DriverStatus  @default(VERIFICATION_PENDING)
 
   @@map("drivers")
 }

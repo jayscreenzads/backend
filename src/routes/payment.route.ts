@@ -7,7 +7,7 @@ import {
   createCharge,
   createProduct,
   createCheckoutSession,
-  getPaymentWebhook,
+  getOneTimePaymentWebhook,
 } from "../controllers/payment.controller";
 import { auth } from "../middlewares/verifyToken";
 // import { upload } from "../lib/s3Config";
@@ -19,10 +19,11 @@ paymentRoutes.post("/add-card", addCard);
 paymentRoutes.post("/create-charge", createCharge);
 paymentRoutes.post("/create-product", createProduct);
 paymentRoutes.post("/create-checkout-session", createCheckoutSession);
-paymentRoutes.post(
-  "/webhook",
-  bodyParser.raw({ type: "application/json" }),
-  getPaymentWebhook
-);
+paymentRoutes.post("/webhook-onetime-payment", getOneTimePaymentWebhook);
+// paymentRoutes.post(
+//   "/webhook-onetime-payment",
+//   bodyParser.raw({ type: "application/json" }),
+//   getOneTimePaymentWebhook
+// );
 
 export default paymentRoutes;

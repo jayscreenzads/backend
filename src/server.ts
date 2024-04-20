@@ -10,19 +10,22 @@ import { SignUpSchema } from "./schema/user";
 import { errorMiddleware } from "./middlewares/errors";
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 const whitelist = ["http://localhost:4000", "http://localhost:5000"];
 
 var corsOptions = {
   origin: whitelist,
-  optionsSuccessStatus: 200, // For legacy browser support
-  // allowedHeaders: ["Content-Type", "Access-Control-Allow-Origin", "Origin"],
+  optionsSuccessStatus: 200,
+  // methods: ["GET", "POST", "PUT", "DELETE"],
+
+  // allowedHeaders: ["Content-Type"],
 };
 
 //cors
 app.use(cors(corsOptions));
+
 app.use(compression());
 
 // Set up rate limiter: maximum of twenty requests per minute
@@ -34,6 +37,8 @@ const limiter = rateLimit({
 app.use(limiter);
 
 const PORT = process.env.PORT || 8000;
+
+app.options("*", cors());
 
 app.use("/api", rootRouter);
 

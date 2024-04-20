@@ -26,14 +26,21 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
 
     jwt.verify(token, SECRET_KEY, (err: any, user: any) => {
       if (err) {
-        console.log("Invalid token!");
-        return res.status(401).json({ status: 401, error: "Invalid token!" });
+        console.log("Invalid token. Unauthenticated!");
+        return res.status(401).json({
+          status: 401,
+          error: "Invalid token. Unauthenticated!",
+        });
       }
 
       (req as CustomRequest).user = user;
       next();
     });
   } else {
-    res.status(401).json({ status: 401, error: "You are not authenticated!" });
+    res.status(401).json({
+      status: 401,
+      error: "Unauthenticated!",
+      message: "Unauthenticated!",
+    });
   }
 };

@@ -214,7 +214,7 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET_KEY;
 
-export const getPaymentWebhook = async (req: Request, res: Response) => {
+export const getOneTimePaymentWebhook = async (req: Request, res: Response) => {
   console.log("getPaymentWebhook");
 
   const reqBuffer = await buffer(req);
@@ -230,33 +230,57 @@ export const getPaymentWebhook = async (req: Request, res: Response) => {
     );
 
     console.log("event.type: ", event.type);
-
-    // Handle the event
-    if (event.type === "checkout.session.completed") {
-      const paymentIntentSucceeded = await prismaClient.payment.create({
-        data: {
-          customer_email: event.data.object?.customer_email,
-          amount: event.data.object.amount_total
-            ? event.data.object.amount_total / 100
-            : 0,
-          paymentId: event.data.object.id,
-          paymentStatus: event.data.object.payment_status,
-          paymentDate: event.data.object.created,
-        },
-      });
-      console.log("paymentIntentSucceeded : ", paymentIntentSucceeded);
-      res
-        .status(200)
-        .send({
-          message: "Created a vehicle success",
-          result: "true",
-          data: { paymentIntentSucceeded },
-        })
-        .end();
-    }
   } catch (err: any) {
     console.log("error: ", err);
-    res.status(400).send(`Webhook Error: ${err.message}`);
+    res.status(400).json({
+      status: 400,
+      error: `Webhook Error: ${err.message}`,
+      message: `Webhook Error: ${err.message}`,
+    });
     return;
+  }
+
+  // Handle the event
+  if (event.type === "checkout.session.completed") {
+    console.log(event);
+
+    const sessionDetails = await stripe.checkout.sessions.retrieve(
+      event.data.object.id,
+      {
+        expand: ["line_items", "customer"],
+      }
+    );
+
+    const lineItems = sessionDetails.line_items;
+    console.log("Paid for items: - \n", lineItems?.data);
+
+    const customerDetails = sessionDetails.customer_details;
+
+    if (event.data.object.payment_status === "paid") {
+      console.log("Payment Success for customer:-", customerDetails?.email);
+
+      console.log("Payment Success line items:-", lineItems?.data);
+
+      // const paymentIntentSucceeded = await prismaClient.payment.create({
+      //   data: {
+      //     customer_email: customerDetails?.email,
+      //     amount: event.data.object.amount_total
+      //       ? event.data.object.amount_total / 100
+      //       : 0,
+      //     paymentId: event.data.object.id,
+      //     paymentStatus: event.data.object.payment_status,
+      //     paymentDate: event.data.object.created,
+      //   },
+      // });
+      // console.log("paymentIntentSucceeded : ", paymentIntentSucceeded);
+    }
+
+    res
+      .status(200)
+      .send({
+        message: "Payment successful",
+        result: "true",
+      })
+      .end();
   }
 };
